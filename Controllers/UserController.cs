@@ -26,7 +26,7 @@ namespace AngularAuthAPI.Controllers
             _authContext = appDbContext;
         }
         [HttpPost("login")]
-        public async Task<IActionResult> Authenticate([FromBody] Users userObj)
+        public async Task<IActionResult> Authenticate([FromBody] Login userObj)
         {
             if (userObj == null)
                 return BadRequest();

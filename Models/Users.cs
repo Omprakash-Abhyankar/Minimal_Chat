@@ -12,6 +12,7 @@ namespace Minimal_Chat_App.Models
         public string Password { get; set; }
         public string Token { get; set; }        
         public string Email { get; set; }
+        //public string Role { get; set; }
 
         // Navigation property for messages sent by the user        
         //public ICollection<Message> SentMessages { get; set; }
