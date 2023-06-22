@@ -12,7 +12,7 @@ using Minimal_Chat_App.Services;
 namespace Minimal_Chat_App.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20230621122710_V1")]
+    [Migration("20230622072705_V1")]
     partial class V1
     {
         /// <inheritdoc />
@@ -27,8 +27,11 @@ namespace Minimal_Chat_App.Migrations
 
             modelBuilder.Entity("Minimal_Chat_App.Models.Login", b =>
                 {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
 
                     b.Property<string>("Password")
                         .IsRequired()
@@ -58,20 +61,16 @@ namespace Minimal_Chat_App.Migrations
 
                     b.Property<string>("ReceiverId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SenderId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("Timestamp")
                         .HasColumnType("datetime2");
 
                     b.HasKey("MessageId");
-
-                    b.HasIndex("ReceiverId");
-
-                    b.HasIndex("SenderId");
 
                     b.ToTable("Message");
                 });
@@ -149,32 +148,6 @@ namespace Minimal_Chat_App.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Minimal_Chat_App.Models.Message", b =>
-                {
-                    b.HasOne("Minimal_Chat_App.Models.Users", "Receiver")
-                        .WithMany("ReceivedMessages")
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Minimal_Chat_App.Models.Users", "Sender")
-                        .WithMany("SentMessages")
-                        .HasForeignKey("SenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-                });
-
-            modelBuilder.Entity("Minimal_Chat_App.Models.Users", b =>
-                {
-                    b.Navigation("ReceivedMessages");
-
-                    b.Navigation("SentMessages");
                 });
 #pragma warning restore 612, 618
         }

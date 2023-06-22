@@ -2,10 +2,13 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
+using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Minimal_Chat_App.Models;
 using Minimal_Chat_App.Services;
 
@@ -21,6 +24,14 @@ namespace Minimal_Chat_App.Controllers
         {
             _context = context;
         }
+
+
+        private string GetAuthenticatedUserId()
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            return userIdClaim?.Value;
+        }
+
 
         // GET: api/Messages
         [HttpGet]
@@ -120,6 +131,55 @@ namespace Minimal_Chat_App.Controllers
 
 
         //[HttpPost]
+        //[Authorize] // Requires authentication to access this endpoint
+        //public IActionResult SendMessage([FromBody] SendMessageRequest messageDto)
+        //{
+        //    // Validate the input
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+
+        //    string senderId = GetAuthenticatedUserId();
+        //    //if (string.IsNullOrEmpty(senderId))
+        //    //{
+        //    //    Console.WriteLine("Failed to retrieve authenticated user ID.");
+        //    //    return Unauthorized();
+        //    //}
+
+        //    // Create a new Message object
+        //    var message = new Message
+        //    {
+        //        SenderId = senderId,
+        //        ReceiverId = messageDto.ReceiverId,
+        //        Content = messageDto.Content,
+        //        Timestamp = DateTime.UtcNow
+        //    };
+
+        //    // Save the message to the database
+        //    _context.Messages.Add(message);
+        //    _context.SaveChanges();
+
+        //    // Prepare the response body
+        //    var response = new SendMessageResponse
+        //    {
+        //        MessageId = message.MessageId,
+        //        SenderId = message.SenderId,
+        //        ReceiverId = message.ReceiverId,
+        //        Content = message.Content,
+        //        Timestamp = message.Timestamp
+        //    };
+
+        //    return Ok(response);
+        //}
+
+
+
+
+
+
+
+        //[HttpPost]
         //public async Task<IActionResult> SendMessage([FromBody] Message request)
         //{
         //    // Validate request parameters
@@ -174,82 +234,160 @@ namespace Minimal_Chat_App.Controllers
         // Helper method to get the user ID from the token
 
 
-        [HttpPost]
-        public async Task<IActionResult> SendMessage(Message request)
-        {
-            // Retrieve the sender user based on the authenticated user
-            string senderId = User.Identity.Name;
-            Users sender = await _context.Users.FindAsync(senderId);
-            if (sender == null)
-            {
-                return NotFound("Sender not found");
-            }
-
-            // Retrieve the receiver user
-            Users receiver = await _context.Users.FindAsync(request.ReceiverId);
-            if (receiver == null)
-            {
-                return NotFound("Receiver not found");
-            }
-
-            // Create a new message
-            Message message = new Message
-            {
-                Content = request.Content,
-                Timestamp = DateTime.UtcNow,
-                SenderId = senderId,
-                ReceiverId = request.ReceiverId
-            };
-
-            // Add the message to the context and save changes
-            _context.Messages.Add(message);
-            await _context.SaveChangesAsync();
-
-            // Prepare the response
-            SendMessageResponse response = new SendMessageResponse
-            {
-                MessageId = message.MessageId,
-                SenderId = senderId,
-                ReceiverId = request.ReceiverId,
-                Content = message.Content,
-                Timestamp = message.Timestamp
-            };
-
-            return Ok(response);
-        }
-        private string GetUserIdFromToken()
-        {
-            // Get the authorization header from the request
-            var authHeader = Request.Headers["Authorization"].FirstOrDefault();
-
-            if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
-            {
-                var token = authHeader.Substring("Bearer ".Length);
-                var tokenHandler = new JwtSecurityTokenHandler();
-                var jwtToken = tokenHandler.ReadJwtToken(token);
-
-                var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-
-                return userId;
-            }
-
-            return null;
-        }
-
-        // POST: api/Messages
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         //[HttpPost]
-        //public async Task<ActionResult<Message>> PostMessage(Message message)
+        //public async Task<IActionResult> SendMessage(Message request)
         //{
-        //  if (_context.Messages == null)
-        //  {
-        //      return Problem("Entity set 'AppDbContext.Messages'  is null.");
-        //  }
+        //    // Retrieve the sender user based on the authenticated user
+        //    string senderId = User.Identity.Name;
+        //    Users sender = await _context.Users.FindAsync(senderId);
+        //    if (sender == null)
+        //    {
+        //        return NotFound("Sender not found");
+        //    }
+
+        //    // Retrieve the receiver user
+        //    Users receiver = await _context.Users.FindAsync(request.ReceiverId);
+        //    if (receiver == null)
+        //    {
+        //        return NotFound("Receiver not found");
+        //    }
+
+        //    // Create a new message
+        //    Message message = new Message
+        //    {
+        //        Content = request.Content,
+        //        Timestamp = DateTime.UtcNow,
+        //        SenderId = senderId,
+        //        ReceiverId = request.ReceiverId
+        //    };
+
+        //    // Add the message to the context and save changes
         //    _context.Messages.Add(message);
         //    await _context.SaveChangesAsync();
 
-        //    return CreatedAtAction("GetMessage", new { id = message.MessageId }, message);
+        //    // Prepare the response
+        //    SendMessageResponse response = new SendMessageResponse
+        //    {
+        //        MessageId = message.MessageId,
+        //        SenderId = senderId,
+        //        ReceiverId = request.ReceiverId,
+        //        Content = message.Content,
+        //        Timestamp = message.Timestamp
+        //    };
+
+        //    return Ok(response);
         //}
+
+
+
+
+        //[HttpPost]
+        //public IActionResult SendMessage([FromBody] SendMessageRequest messageDto)
+        //{
+        //    // Validate the input
+        //    if (!ModelState.IsValid)
+        //    {
+        //        return BadRequest(ModelState);
+        //    }
+
+        //    string senderId = GetAuthenticatedUserId();
+        //    if (senderId == null)
+        //    {
+        //        return Unauthorized();
+        //    }
+
+        //    // Create a new Message object
+        //    var message = new Message
+        //    {
+        //        SenderId = senderId,
+        //        ReceiverId = messageDto.ReceiverId,
+        //        Content = messageDto.Content,
+        //        Timestamp = DateTime.UtcNow
+        //    };
+
+        //    // Save the message to the database
+        //    _context.Messages.Add(message);
+        //    _context.SaveChanges();
+
+        //    // Prepare the response body
+        //    var response = new SendMessageResponse
+        //    {
+        //        MessageId = message.MessageId,
+        //        SenderId = message.SenderId,
+        //        ReceiverId = message.ReceiverId,
+        //        Content = message.Content,
+        //        Timestamp = message.Timestamp
+        //    };
+
+        //    return Ok(response);
+        //}
+
+
+
+
+
+        //private string GetUserIdFromToken()
+        //{
+        //    // Get the authorization header from the request
+        //    var authHeader = Request.Headers["Authorization"].FirstOrDefault();
+
+        //    if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer "))
+        //    {
+        //        var token = authHeader.Substring("Bearer ".Length);
+        //        var tokenHandler = new JwtSecurityTokenHandler();
+        //        var jwtToken = tokenHandler.ReadJwtToken(token);
+
+        //        var userId = jwtToken.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
+
+        //        return userId;
+        //    }
+
+        //    return null;
+        //}
+
+
+
+        //private string CreateJwt(Users user)
+        //{
+        //    var jwtTokenHandler = new JwtSecurityTokenHandler();
+        //    var key = Encoding.ASCII.GetBytes("veryverysecret.....");
+        //    var identity = new ClaimsIdentity(new Claim[]
+        //    {
+        //           //new Claim(ClaimTypes.Role, user.Role),
+        //           new Claim(ClaimTypes.Name,$"{user.FirstName} {user.LastName}")
+        //    });
+
+        //    var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
+
+        //    var tokenDescriptor = new SecurityTokenDescriptor
+        //    {
+        //        Subject = identity,
+        //        Expires = DateTime.Now.AddDays(1),
+        //        SigningCredentials = credentials
+        //    };
+        //    var token = jwtTokenHandler.CreateToken(tokenDescriptor);
+        //    return jwtTokenHandler.WriteToken(token);
+        //}
+
+
+
+
+
+
+        //POST: api/Messages
+        //To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost]
+        public async Task<ActionResult<Message>> PostMessage(Message message)
+        {
+            if (_context.Messages == null)
+            {
+                return Problem("Entity set 'AppDbContext.Messages'  is null.");
+            }
+            _context.Messages.Add(message);
+            await _context.SaveChangesAsync();
+
+            return CreatedAtAction("GetMessage", new { id = message.MessageId }, message);
+        }
 
         // DELETE: api/Messages/5
         [HttpDelete("{id}")]

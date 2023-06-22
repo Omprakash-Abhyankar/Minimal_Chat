@@ -25,30 +25,34 @@ namespace AngularAuthAPI.Controllers
         {
             _authContext = appDbContext;
         }
-        //[HttpPost("login")]
-        //public async Task<IActionResult> Authenticate([FromBody] Login userObj)
-        //{
-        //    if (userObj == null)
-        //        return BadRequest();
-        //    // && x.Password == userObj.Password
-        //    var user = await _authContext.Users.FirstOrDefaultAsync(x=>x.UserName == userObj.UserName);
-         
-        //    if (user == null)
-        //        return NotFound(new {Message = "User Not Found!" });
-        //    //these is check the encrypted password.
-        //    if(!PasswordHasher.VerifyPassword(userObj.Password, user.Password))
-        //    {
-        //        return BadRequest(new { Message = "Password is Incorrect" });
-        //    }
+        [HttpPost("login")]
+        public async Task<IActionResult> Authenticate([FromBody] Login userObj)
+        {
+            if (userObj == null)
+                return BadRequest();
+            // && x.Password == userObj.Password
+            var user = await _authContext.Users.FirstOrDefaultAsync(x => x.UserName == userObj.UserName);
 
-        //    user.Token = CreateJwt(user);
+            if (user == null)
+                return NotFound(new { Message = "User Not Found!" });
+            //these is check the encrypted password.
+            if (!PasswordHasher.VerifyPassword(userObj.Password, user.Password))
+            {
+                return BadRequest(new { Message = "Password is Incorrect" });
+            }
 
-        //    return Ok(new
-        //    { 
-        //        Token = user.Token,
-        //        Message = "Login Success!"
-        //    });
-        //}
+            user.Token = CreateJwt(user);
+
+            return Ok(new
+            {
+                Token = user.Token,
+                Message = "Login Success!"
+            });
+        }
+
+
+
+
 
 
         [HttpPost("register")]
@@ -73,7 +77,7 @@ namespace AngularAuthAPI.Controllers
 
 
             userObj.Password = PasswordHasher.HashPassword(userObj.Password);     //these will help to hash the password.
-            //userObj.Role = "User";
+            //userObj.Role = "User";       
             userObj.Token = "";
             await _authContext.Users.AddAsync(userObj); //these line will help to send data in database
             await _authContext.SaveChangesAsync();
@@ -109,7 +113,7 @@ namespace AngularAuthAPI.Controllers
                 var key = Encoding.ASCII.GetBytes("veryverysecret.....");
                 var identity = new ClaimsIdentity(new Claim[]
                 {
-                   //new Claim(ClaimTypes.Role, user.Role),
+                   new Claim(ClaimTypes.NameIdentifier, user.UserId),
                    new Claim(ClaimTypes.Name,$"{user.FirstName} {user.LastName}")
                 });
 

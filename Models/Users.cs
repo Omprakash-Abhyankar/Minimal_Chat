@@ -15,8 +15,8 @@ namespace Minimal_Chat_App.Models
 
 
 
-        public ICollection<Message> SentMessages { get; set; }
-        public ICollection<Message> ReceivedMessages { get; set; }
+        //public ICollection<Message> SentMessages { get; set; }
+        //public ICollection<Message> ReceivedMessages { get; set; }
         //public string Role { get; set; }
 
         // Navigation property for messages sent by the user        
