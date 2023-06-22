@@ -5,7 +5,7 @@ namespace Minimal_Chat_App.Models
     public class Users
     {
         [Key]
-        public string UserId { get; set; }
+        public int UserId { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string UserName { get; set; }
@@ -13,16 +13,10 @@ namespace Minimal_Chat_App.Models
         public string Token { get; set; }        
         public string Email { get; set; }
 
-
-
-        //public ICollection<Message> SentMessages { get; set; }
-        //public ICollection<Message> ReceivedMessages { get; set; }
-        //public string Role { get; set; }
-
         // Navigation property for messages sent by the user        
         //public ICollection<Message> SentMessages { get; set; }
 
-        //// Navigation property for messages received by the user
+        // Navigation property for messages received by the user
         //public ICollection<Message> ReceivedMessages { get; set; }
     }
 }

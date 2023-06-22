@@ -21,10 +21,14 @@ namespace AngularAuthAPI.Controllers
     public class UserController : ControllerBase
     {
         private readonly AppDbContext _authContext;
+
+
         public UserController(AppDbContext appDbContext)
         {
             _authContext = appDbContext;
         }
+
+
         [HttpPost("login")]
         public async Task<IActionResult> Authenticate([FromBody] Login userObj)
         {
@@ -49,11 +53,6 @@ namespace AngularAuthAPI.Controllers
                 Message = "Login Success!"
             });
         }
-
-
-
-
-
 
         [HttpPost("register")]
         public async Task<IActionResult> RegisterUser([FromBody] Users userObj)
@@ -106,16 +105,19 @@ namespace AngularAuthAPI.Controllers
                 sb.Append("Password Should Contain Special Charater" + Environment.NewLine);
             return sb.ToString();
         }
-            //these token is made up of three things 1. header 2. payload 3. signiture
-            private string CreateJwt(Users user)
+         
+
+        //these token is made up of three things 1. header 2. payload 3. signiture
+        private string CreateJwt(Users user)
+        {
+            var jwtTokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes("veryverysecret.....");
+            var identity = new ClaimsIdentity(new Claim[]
             {
-                var jwtTokenHandler = new JwtSecurityTokenHandler();
-                var key = Encoding.ASCII.GetBytes("veryverysecret.....");
-                var identity = new ClaimsIdentity(new Claim[]
-                {
-                   new Claim(ClaimTypes.NameIdentifier, user.UserId),
+
+                  new Claim("UserId", user.UserId.ToString()),
                    new Claim(ClaimTypes.Name,$"{user.FirstName} {user.LastName}")
-                });
+            });
 
             var credentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256);
 
@@ -125,9 +127,10 @@ namespace AngularAuthAPI.Controllers
                 Expires = DateTime.Now.AddDays(1),
                 SigningCredentials = credentials
             };
-                var token = jwtTokenHandler.CreateToken(tokenDescriptor);
-                return jwtTokenHandler.WriteToken(token);
-            }
+            var token = jwtTokenHandler.CreateToken(tokenDescriptor);
+            return jwtTokenHandler.WriteToken(token);
+        }
+
 
 
 
@@ -136,21 +139,9 @@ namespace AngularAuthAPI.Controllers
             throw new NotImplementedException();
         }
 
-      /*  [HttpPost("InsertData")]
-        public async Task<IActionResult> InsertData([FromBody] Task taskObj)
-        {
-            if (taskObj == null)
-                return BadRequest();
-            return Ok(new
-            {
-                Message = "To-Do List Created Sussessfully!."
-            });
-        }*/
 
-
-        //using these user can only login when it with has token men
-        //[Authorize]
         //ctreate a API to get all users
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<Users>> GetAllUsers()
         {

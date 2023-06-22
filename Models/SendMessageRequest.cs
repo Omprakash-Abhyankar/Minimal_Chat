@@ -4,8 +4,9 @@ namespace Minimal_Chat_App.Models
 {
     public class SendMessageRequest
     {
+        //public string MessageId { get; set; }   
         [Required]
-        public string ReceiverId { get; set; }
+        public int ReceiverId { get; set; }
 
         [Required]
         public string Content { get; set; }
