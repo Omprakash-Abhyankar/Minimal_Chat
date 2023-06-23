@@ -41,7 +41,9 @@ builder.Services.AddAuthentication(x =>
     {
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("veryverysecret.....")),
+        //Validite the receipient of the token is authorize to receive
         ValidateAudience = false,
+        //Validite the Issuer that Validiate the token 
         ValidateIssuer = false,
         //the minimum session time is 5 min but these will help for exact time.
         ClockSkew = TimeSpan.Zero
